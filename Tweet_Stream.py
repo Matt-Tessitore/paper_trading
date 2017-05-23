@@ -3,6 +3,7 @@ import json
 from datetime import datetime
 import settings # Load API Twitter variables
 import tweepy
+from pprint import pprint
 
 class Tweet_Stream(tweepy.StreamListener):
     def __init__(self, keyword):
@@ -10,8 +11,16 @@ class Tweet_Stream(tweepy.StreamListener):
        self.out_file = open(keyword + "_" + datetime.now().strftime("%Y_%m_%d_%H_%M_%S"), "w")
 
     def on_data(self, data):
-        json_data = json.loads(data)
-        self.out_file.write(str(json_data))
+        tweet_data = json.loads(data)
+        self.out_file.write(str(tweet_data))
+        
+        # Clean location data
+        if tweet_data['user']['location'] is None:
+            clean_location = 'None'
+        else:
+            clean_location = tweet_data['user']['location']
+
+        print(u''.join((tweet_data['text'].strip(), ", ", clean_location)).encode('utf-8').strip())
 
     def on_error(self, status_code):
         print >> sys.stderr, "Encourated error with status code: ", status_code
